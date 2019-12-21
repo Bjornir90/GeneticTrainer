@@ -20,6 +20,7 @@ public class GeneticAlgo {
     private List<Fight> fights;
     private HashMap<Integer, Float> idToScore;
     private HashMap<Integer, ADN> idToADN;
+    private int numberOfFighters;
 
     public GeneticAlgo() {
         this(99);
@@ -30,6 +31,8 @@ public class GeneticAlgo {
         fighters = new ArrayList<>();
         idToScore = new HashMap<>();
         idToADN = new HashMap<>();
+
+        this.numberOfFighters = numberOfFighters;
 
         for (int i = 0; i < numberOfFighters; i++) {
             switch (i%3) {
@@ -67,12 +70,14 @@ public class GeneticAlgo {
 
     private void computeScore(FightResult result){
         int idToChange = result.getWinner().getId();
-        idToScore.replace(idToChange, idToScore.get(idToChange)+1);
+        float toReplace = idToScore.get(idToChange);
+        idToScore.replace(idToChange, toReplace+1);
     }
 
     private void computeFinalScore(){
         for(Integer id : idToScore.keySet()){
-            idToScore.replace(id, idToScore.get(id)/fighters.size());
+            float toReplace = idToScore.get(id);
+            idToScore.replace(id, toReplace/(numberOfFighters*2));
         }
     }
 
@@ -82,9 +87,7 @@ public class GeneticAlgo {
             fighters.forEach(fighter1 -> fights.add(new Fight(fighter, fighter1)));
         }
         //Reset scores
-        for (int i = 0; i < fighters.size(); i++) {
-            idToScore.put(i, 0f);
-        }
+        idToScore.keySet().stream().forEach(id -> idToScore.replace(id, 0f));
     }
 
     private void reproduce(){
@@ -98,7 +101,7 @@ public class GeneticAlgo {
             for (int id = fighterNumber; id < idToScore.size(); id+=3) {
 
                 //The chance to reproduce is a random number multiplied by the score of the fighter
-                float chance = ThreadLocalRandom.current().nextFloat()+idToScore.get(id)*0.1f;
+                float chance = ThreadLocalRandom.current().nextFloat()*0.5f+idToScore.get(id);
 
                 if(chance > reproduceThreshold){
                     reproduceThreshold = chance;
@@ -106,27 +109,30 @@ public class GeneticAlgo {
                 }
 
             }
-            System.out.println("At index "+fighterNumber);
-            System.out.println("idToReproduce = " + idToReproduce);
-            System.out.println("score : "+idToScore.get(idToReproduce));
-            idToADNnew.put(fighterNumber, idToADN.get(idToReproduce).mutate(6));
+
+            ADN replacingADN = idToADN.get(idToReproduce).mutate(4);
+/*
+            if(replacingADN.equals(idToADN.get(fighterNumber)) && idToReproduce != fighterNumber) {
+                System.out.println("At index " + fighterNumber);
+                System.out.println("idToReproduce = " + idToReproduce);
+                System.out.println("score : " + idToScore.get(idToReproduce));
+                System.out.println("Mutated ADN = " + replacingADN);
+            }
+*/
+            idToADNnew.put(fighterNumber, replacingADN);
         }
         idToADN = idToADNnew;
     }
 
     public void runMatches() {
         createMatches();
-        boolean saved = false;
-        for(Fight fight : fights){
 
-            if(!saved) {
-                saved = true;
-            }
+        for(Fight fight : fights){
 
             fight.fighter1.reset();
             fight.fighter2.reset();
             fight.fighter1.moveTo(50, 50);
-            fight.fighter2.moveTo(250, 50);
+            fight.fighter2.moveTo(150, 50);
 
             fight.fighter1.setOpponent(fight.fighter2);
             fight.fighter2.setOpponent(fight.fighter1);

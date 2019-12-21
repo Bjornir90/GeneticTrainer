@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ADN {
@@ -18,6 +19,17 @@ public class ADN {
     public static final int MAX_POINTS = 100, NUMBER_CARAC = 7;
 
     public HashMap<Caracteristic, Integer> genes;
+
+    public ADN(){
+        genes = new HashMap<>();
+        genes.put(Caracteristic.DAMAGE, 0);
+        genes.put(Caracteristic.HEALTH, 0);
+        genes.put(Caracteristic.ATK_SPEED, 0);
+        genes.put(Caracteristic.MOV_SPEED, 0);
+        genes.put(Caracteristic.CRIT_CHANCE, 0);
+        genes.put(Caracteristic.CRIT_DAMAGE, 0);
+        genes.put(Caracteristic.DODGE, 0);
+    }
 
     public ADN(int damage, int health, int atk_speed, int mov_speed, int crit_chance, int crit_damage, int dodge) {
         genes = new HashMap<>();
@@ -39,6 +51,8 @@ public class ADN {
 
     public ADN mutate(int maxOvershoot){
 
+        ADN newADN = new ADN();
+
         int total = 0;
         for (int i = 0; i < NUMBER_CARAC; i++) {
             total += genes.get(Caracteristic.values()[i]);
@@ -58,8 +72,8 @@ public class ADN {
                 int originalValue = genes.get(toChange);
 
                 //Only a limited chance of mutation
-                if(ThreadLocalRandom.current().nextInt(0,100) < 95){
-                    genes.replace(toChange, originalValue);
+                if(ThreadLocalRandom.current().nextInt(0,100) < 96){
+                    newADN.genes.replace(toChange, originalValue);
                     continue;
                 }
 
@@ -77,7 +91,7 @@ public class ADN {
                     randomChange = -maxOvershoot;
                 }
 
-                genes.replace(toChange, originalValue+randomChange);
+                newADN.genes.replace(toChange, originalValue+randomChange);
                 total += randomChange;
             }
         }
@@ -92,11 +106,11 @@ public class ADN {
             if(originalValue > MAX_POINTS-change || originalValue < -change)
                 continue;
 
-            genes.replace(toChange, originalValue+change);
+            newADN.genes.replace(toChange, originalValue+change);
             total += change;
         }
 
-        return this;
+        return newADN;
     }
 
     @Override
@@ -114,6 +128,19 @@ public class ADN {
 
     public ADN fromJson(JSONObject dna){
         return new ADN(dna);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ADN adn = (ADN) o;
+        return Objects.equals(genes, adn.genes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(genes);
     }
 
     public static void main(String[] args) {

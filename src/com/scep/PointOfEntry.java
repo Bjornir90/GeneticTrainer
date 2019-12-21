@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PointOfEntry {
-    private static int NUMBER_OF_FIGHTERS = 99;
+    private static int NUMBER_OF_FIGHTERS = 498;
 
     public static void writeResults(List<List<ADN>> list) throws IOException {
         FileWriter fw = new FileWriter("Result.csv");
@@ -29,7 +29,7 @@ public class PointOfEntry {
     }
 
     public static void writeMeanResults(List<List<ADN>> list) throws IOException {
-        FileWriter fw = new FileWriter("MeanResult.csv");
+        FileWriter fw = new FileWriter("MeanResult10.csv");
         Caracteristic[] enumValues = Caracteristic.values();
 
         fw.write("Iteration,Class,");
@@ -125,7 +125,7 @@ public class PointOfEntry {
     public static void main(String[] args) throws IOException {
         GeneticAlgo algo = new GeneticAlgo(NUMBER_OF_FIGHTERS);
         List<List<ADN>> listOfResult = new ArrayList<>();
-        int numberOfIterations = 100;
+        int numberOfIterations = 400;
         for (int i = 0; i < numberOfIterations; i++) {
             algo.runMatches();
             List<ADN> listADN = algo.getADNList();
@@ -138,7 +138,7 @@ public class PointOfEntry {
         //writeResults(listOfResult);
 
         System.out.println("Writing results...");
-        //writeMeanResults(listOfResult);
+        writeMeanResults(listOfResult);
         System.out.println("Computation complete with "+numberOfIterations+" iterations");
     }
 }
